@@ -18,11 +18,14 @@ for line in fileinput.input():
 
 
 def is_valid(r):
-    if r != sorted(r) and r != sorted(r, reverse=True):
+    d = r[1] - r[0]
+    if d == 0:
         return False
     for i in range(len(r)-1):
-        d = abs(r[i]-r[i+1])
-        if d < 1 or d > 3:
+        c = r[i+1]-r[i]
+        if d > 0 and (c < 1 or c > 3):
+            return False
+        if d < 0 and c > -1 or c < -3:
             return False
     return True
 
