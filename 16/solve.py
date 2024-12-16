@@ -2,7 +2,6 @@
 
 import fileinput
 from heapq import heapify, heappop, heappush
-from collections import deque
 
 # counters
 T = 0
@@ -23,9 +22,8 @@ R = len(G)
 C = len(G[0])
 
 
-def solve(g, start, end):
+def solve(g, start, end, d):
     q = list()
-    d = 'e'
     q.append((0, d, start))
     heapify(q)
     seen = set()
@@ -49,16 +47,14 @@ def solve(g, start, end):
     assert False, 'lost in maze'
 
 
-def solve2(g, start, end, maxk):
+def solve2(g, start, end, d, maxk):
     q = list()
-    pd = '#'
-    d = 'e'
-    q.append((0, d, pd, start, frozenset(start)))
+    q.append((0, d, start, set()))
     heapify(q)
     seen = dict()
     seen_path = set()
     while q:
-        (k, d, pd, p, t) = heappop(q)
+        (k, d, p, t) = heappop(q)
         if k > maxk:
             continue
 
@@ -67,22 +63,21 @@ def solve2(g, start, end, maxk):
             seen_path |= t
             continue
 
-        if (d, pd, p) in seen:
-            if k > seen[(d, pd, p)]:
-                continue
-        seen[(d, pd, p)] = k
+        if (d, p) in seen and k > seen[(d, p)]:
+            continue
+        seen[(d, p)] = k
 
         (r, c) = p
         rr, cc = r + DIRS[d][0], c + DIRS[d][1]
         if g[rr][cc] != '#':
             tt = set(t)
             tt.add((rr, cc))
-            heappush(q, (k+1, d, pd, (rr, cc), frozenset(tt)))
+            heappush(q, (k+1, d, (rr, cc), tt))
 
         for dd in TURNS[d]:
-            heappush(q, (k+1000, dd, p, (r, c), t))
+            heappush(q, (k+1000, dd, (r, c), t))
 
-    return len(seen_path)-1
+    return len(seen_path)+1
 
 
 start = end = (0, 0)
@@ -93,6 +88,6 @@ for r in range(R):
         if G[r][c] == 'E':
             end = (r, c)
 
-T = solve(G, start, end)
-T2 = solve2(G, start, end, T)
+T = solve(G, start, end, 'e')
+T2 = solve2(G, start, end, 'e', T)
 print(f"Tot {T} {T2}")
