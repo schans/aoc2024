@@ -1,7 +1,7 @@
 #!/usr/bin/env pypy3
 
 import fileinput
-from collections import defaultdict
+from re import findall
 
 # counters
 T = 0
@@ -12,6 +12,11 @@ P = list()
 PC = 0
 OUT = list()
 
+
+def ints(s):
+    return list(map(int, findall(r'\d+', s)))
+
+
 for line in fileinput.input():
     l = line.strip()
     if not l:
@@ -21,10 +26,7 @@ for line in fileinput.input():
         reg, val = l.split(":")
         R[reg[-1:]] = int(val)
     if l.startswith("Program"):
-        P = [int(c) for c in l[9:].split(',')]
-
-print(f"{R=} {P=}")
-
+        P = ints(l)
 
 while True:
     opcode = P[PC]
@@ -41,8 +43,6 @@ while True:
         combo = R['C']
     elif operand == 7:
         assert False, "reserved"
-
-    print(f'{opcode=} {operand=} {combo=}')
 
     if opcode == 0:
         # adv
@@ -79,4 +79,37 @@ while True:
         break
 
 T = ",".join((str(c) for c in OUT))
+
+# Reverse engineer for input: 2,4, 1,5, 7,5, 1,6, 0,3, 4,0, 5,5, 3,0
+# bst:  b = a % 8
+# bxl:  b = b ^ 5
+# cdv:  c = a >> b
+# bxl:  b = b ^ 6
+# adv:  a = a >> 3
+# bxc:  b = b ^ c
+# out:  out(b % 8)
+
+
+def solve_from_back(p, cur):
+    if len(p) == 0:
+        return cur
+
+    for k in range(8):
+        a = cur << 3 | k
+        b = a % 8
+        b = b ^ 5
+        c = a >> b
+        b = b ^ 6
+        b = b ^ c
+        out = b % 8
+        if out == p[-1]:
+            nout = solve_from_back(p[:-1], a)
+            if nout == None:
+                continue
+            else:
+                return nout
+
+
+T2 = solve_from_back(P, 0)
+
 print(f"Tot {T} {T2}")
