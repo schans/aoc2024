@@ -17,12 +17,12 @@ for line in fileinput.input():
 
 def get_secret(s, n):
     seq = list()
-    seq.append(int(str(s)[-1:]))
+    seq.append(s % 10)
     for _ in range(n):
         s = (s ^ (s << 6)) % 16777216
         s = (s ^ (s >> 5)) % 16777216
         s = (s ^ (s << 11)) % 16777216
-        seq.append(int(str(s)[-1:]))
+        seq.append(s % 10)
     return s, seq
 
 
