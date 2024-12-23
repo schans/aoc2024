@@ -26,19 +26,13 @@ for line in fileinput.input():
 
 def is_full_connected(conn, l):
     f, t = l
-
     if not f in conn and not t in conn:
         return False
-
     if f in conn and t in conn:
         return False
 
     d = (l ^ conn).pop()
-    for c in conn:
-        if (d, c) not in C:
-            return False
-
-    return True
+    return all((d, c) in C for c in conn)
 
 
 seen = set()
@@ -62,6 +56,7 @@ while True:
                     ns.add(n)
     if len(ns) == 0:
         break
+    print(len(ns))
     seen = ns
 
 T2 = ",".join(sorted(seen.pop()))
